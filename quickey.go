@@ -5,7 +5,8 @@ package quickey
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+
+	// "fmt"
 	"log"
 	"net/http"
 )
@@ -20,8 +21,17 @@ type Response struct {
 	BaseUrl string
 }
 
+type Data struct {
+	Email          string `json:"email"`
+	AppName        string `json:"appName"`
+	SocialApps     string `json:"socialApps"`
+	RedirectUri    string `json:"redirectUri"`
+	RedirectUrlApp string `json:"redirectUrlApp"`
+	ApiKey         string `json:"apiKey"`
+}
+
 type App struct {
-	Data interface{} `json:"app"`
+	Data Data `json:"app"`
 }
 
 type Auth struct {
@@ -35,7 +45,21 @@ func New(api_key string) *Response {
 	}
 }
 
-func (q *Response) GetMetadata() *App {
+func (q *Response) GetMetadata(w http.ResponseWriter, r *http.Request) string {
+	// var data Data
+	// renderResponse(w,
+	// 	&App{
+	// 		Data: Data{
+	// 			Email:          data.Email,
+	// 			AppName:        data.AppName,
+	// 			SocialApps:     data.SocialApps,
+	// 			RedirectUri:    data.RedirectUri,
+	// 			RedirectUrlApp: data.RedirectUrlApp,
+	// 			ApiKey:         data.ApiKey,
+	// 		},
+	// 	},
+	// 	http.StatusCreated)
+
 	values := map[string]string{"api_key": q.ApiKey}
 	json_data, err := json.Marshal(values)
 
@@ -43,18 +67,28 @@ func (q *Response) GetMetadata() *App {
 		log.Fatal(err)
 	}
 
-	resp, err := http.Post(q.BaseUrl+"/auth/apiKey", "application/json",
+	responseJSON, err := http.Post(q.BaseUrl+"/auth/apiKey", "application/json",
 		bytes.NewBuffer(json_data))
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(resp)
+	w.Header().Set("Content-Type", "application/json")
+	responseBytes, err := json.Marshal(responseJSON)
+	if err != nil {
+		log.Fatal(err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 
-	// var res map[string]interface{}
-	// json.NewDecoder(resp.Body).Decode()
-	return &App{}
+	w.WriteHeader(http.StatusCreated)
+
+	if _, err = w.Write(responseBytes); err != nil {
+		log.Fatal(err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	return string(responseBytes)
 }
 
 // func (q *Response) GetAccessToken() *Auth {
