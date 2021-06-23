@@ -37,7 +37,7 @@ func New(api_key string) *Response {
 	}
 }
 
-func (q *Response) GetMetadata() *App {
+func (q *Response) GetMetadata() App {
 	values := map[string]string{"api_key": q.ApiKey}
 	json_data, err := json.Marshal(values)
 
@@ -74,7 +74,7 @@ func (q *Response) GetMetadata() *App {
 	// 	w.WriteHeader(http.StatusInternalServerError)
 	// }
 
-	return &app
+	return app
 }
 
 // func (q *Response) GetAccessToken() *Auth {
