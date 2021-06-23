@@ -16,6 +16,7 @@ type Response struct {
 	ApiKey  string
 	BaseUrl string
 	App     []App
+	Auth    []Auth
 }
 
 type App struct {
@@ -39,38 +40,59 @@ func New(api_key string) *Response {
 }
 
 func (q *Response) GetMetadata() *App {
-	// values := map[string]string{"api_key": q.ApiKey}
-	values := map[string]string{"apiKey": "inT9Ic-BhfqbRA-wgtz8Dn_WHUuAAmSI3VN0kByQpyU"}
 
+	values := map[string]string{"apiKey": q.ApiKey}
 	json_data, err := json.Marshal(values)
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// responseJSON, err := http.Post(q.BaseUrl+"/auth/apiKey", "application/json",
-	// 	bytes.NewBuffer(json_data))
-
-	responseJSON, err := http.Post("https://api.getquickey.com/auth/apiKey", "application/json",
+	responseJSON, err := http.Post(q.BaseUrl+"/auth/apiKey", "application/json",
 		bytes.NewBuffer(json_data))
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	var responseMap map[string]interface{}
-	// var res["app"] map[string]interface{}
 
+	var responseMap map[string]interface{}
 	json.NewDecoder(responseJSON.Body).Decode(&responseMap)
 
 	responseBytes, err := json.Marshal(responseMap["app"])
+
 	responseString := string(responseBytes)
-	// fmt.Println(jsonString)
+
 	app := App{}
 	json.Unmarshal([]byte(responseString), &app)
 	q.App = append(q.App, app)
-	return &app
 
+	return &app
 }
 
-// func (q *Response) GetAccessToken() *Auth {
-// }
+func (q *Response) GetAccessToken(email string) *Auth {
+
+	values := map[string]string{"email": email}
+	json_data, err := json.Marshal(values)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	responseJSON, err := http.Post(q.BaseUrl+"/loginRegister", "application/json",
+		bytes.NewBuffer(json_data))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var responseMap map[string]interface{}
+	json.NewDecoder(responseJSON.Body).Decode(&responseMap)
+
+	responseBytes, err := json.Marshal(responseMap)
+
+	responseString := string(responseBytes)
+
+	auth := Auth{}
+	json.Unmarshal([]byte(responseString), &auth)
+	q.Auth = append(q.Auth, auth)
+
+	return &auth
+}
