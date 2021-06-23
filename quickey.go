@@ -15,6 +15,7 @@ const (
 type Response struct {
 	ApiKey  string
 	BaseUrl string
+	App     []App
 }
 
 type App struct {
@@ -37,7 +38,7 @@ func New(api_key string) *Response {
 	}
 }
 
-func GetMetadata() App {
+func (q *Response) GetMetadata() *App {
 	// values := map[string]string{"api_key": q.ApiKey}
 	values := map[string]string{"apiKey": "inT9Ic-BhfqbRA-wgtz8Dn_WHUuAAmSI3VN0kByQpyU"}
 
@@ -66,7 +67,9 @@ func GetMetadata() App {
 	// fmt.Println(jsonString)
 	app := App{}
 	json.Unmarshal([]byte(responseString), &app)
-	return app
+	q.App = append(q.App, app)
+	return &app
+
 }
 
 // func (q *Response) GetAccessToken() *Auth {
