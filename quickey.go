@@ -37,15 +37,20 @@ func New(api_key string) *Response {
 	}
 }
 
-func (q *Response) GetMetadata() App {
-	values := map[string]string{"api_key": q.ApiKey}
+func GetMetadata() App {
+	// values := map[string]string{"api_key": q.ApiKey}
+	values := map[string]string{"apiKey": "inT9Ic-BhfqbRA-wgtz8Dn_WHUuAAmSI3VN0kByQpyU"}
+
 	json_data, err := json.Marshal(values)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	responseJSON, err := http.Post(q.BaseUrl+"/auth/apiKey", "application/json",
+	// responseJSON, err := http.Post(q.BaseUrl+"/auth/apiKey", "application/json",
+	// 	bytes.NewBuffer(json_data))
+
+	responseJSON, err := http.Post("https://api.getquickey.com/auth/apiKey", "application/json",
 		bytes.NewBuffer(json_data))
 
 	if err != nil {
@@ -61,19 +66,6 @@ func (q *Response) GetMetadata() App {
 	// fmt.Println(jsonString)
 	app := App{}
 	json.Unmarshal([]byte(responseString), &app)
-	// w.Header().Set("Content-Type", "application/json")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// }
-
-	// w.WriteHeader(http.StatusCreated)
-
-	// if _, err = w.Write(responseBytes); err != nil {
-	// 	log.Fatal(err)
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// }
-
 	return app
 }
 
