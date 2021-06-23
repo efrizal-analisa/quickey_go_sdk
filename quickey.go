@@ -1,12 +1,8 @@
 package quickey
 
-// "github.com/efrizal-analisa/quickey_go_sdk/app"
-// "github.com/efrizal-analisa/quickey_go_sdk/auth"
 import (
 	"bytes"
 	"encoding/json"
-
-	// "fmt"
 	"log"
 	"net/http"
 )
@@ -21,7 +17,7 @@ type Response struct {
 	BaseUrl string
 }
 
-type Data struct {
+type App struct {
 	Email          string `json:"email"`
 	AppName        string `json:"appName"`
 	SocialApps     string `json:"socialApps"`
@@ -30,12 +26,8 @@ type Data struct {
 	ApiKey         string `json:"apiKey"`
 }
 
-type App struct {
-	Data Data `json:"app"`
-}
-
 type Auth struct {
-	Token interface{} `json:"access_token"`
+	Token string `json:"access_token"`
 }
 
 func New(api_key string) *Response {
@@ -45,21 +37,7 @@ func New(api_key string) *Response {
 	}
 }
 
-func (q *Response) GetMetadata(w http.ResponseWriter, r *http.Request) string {
-	// var data Data
-	// renderResponse(w,
-	// 	&App{
-	// 		Data: Data{
-	// 			Email:          data.Email,
-	// 			AppName:        data.AppName,
-	// 			SocialApps:     data.SocialApps,
-	// 			RedirectUri:    data.RedirectUri,
-	// 			RedirectUrlApp: data.RedirectUrlApp,
-	// 			ApiKey:         data.ApiKey,
-	// 		},
-	// 	},
-	// 	http.StatusCreated)
-
+func (q *Response) GetMetadata() *App {
 	values := map[string]string{"api_key": q.ApiKey}
 	json_data, err := json.Marshal(values)
 
@@ -73,22 +51,30 @@ func (q *Response) GetMetadata(w http.ResponseWriter, r *http.Request) string {
 	if err != nil {
 		log.Fatal(err)
 	}
+	var responseMap map[string]interface{}
+	// var res["app"] map[string]interface{}
 
-	w.Header().Set("Content-Type", "application/json")
-	responseBytes, err := json.Marshal(responseJSON)
-	if err != nil {
-		log.Fatal(err)
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	json.NewDecoder(responseJSON.Body).Decode(&responseMap)
 
-	w.WriteHeader(http.StatusCreated)
+	responseBytes, err := json.Marshal(responseMap["app"])
+	responseString := string(responseBytes)
+	// fmt.Println(jsonString)
+	app := App{}
+	json.Unmarshal([]byte(responseString), &app)
+	// w.Header().Set("Content-Type", "application/json")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// }
 
-	if _, err = w.Write(responseBytes); err != nil {
-		log.Fatal(err)
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	// w.WriteHeader(http.StatusCreated)
 
-	return string(responseBytes)
+	// if _, err = w.Write(responseBytes); err != nil {
+	// 	log.Fatal(err)
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// }
+
+	return &app
 }
 
 // func (q *Response) GetAccessToken() *Auth {
